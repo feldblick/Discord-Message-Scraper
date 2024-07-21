@@ -17,7 +17,10 @@ for message in json_data:
 for i, message in enumerate(json_data):
     if re.search(r"<@\d{18}>", message["content"]) != None:
         for user_mention in re.findall(r"<@\d{18}>", message["content"]):
-            json_data[i]["content"] = re.sub(r"<@\d{18}>", "@" + users[user_mention.removeprefix("<@").removesuffix(">")], message["content"], 1)
+            try:
+                json_data[i]["content"] = re.sub(r"<@\d{18}>", "@" + users[user_mention.removeprefix("<@").removesuffix(">")], message["content"], 1)
+            except Exception as e:
+                print(f"error {str(e)}")
 
 # Replaces UTC timestamp
 for i, message in enumerate(json_data):

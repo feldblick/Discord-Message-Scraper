@@ -1,4 +1,4 @@
-import yaml, requests, json, datetime, tzlocal, pytz, math
+import yaml, requests, json, datetime, math
 
 
 # Reads from a YAML file and returns a dictionary
@@ -10,20 +10,33 @@ def read_yml(file_path: str):
 def round_up(x: int, base: int):
     return int(base * math.ceil(x / base))
 
-# Parses UTC time (idk if it works 100% of the time)
-def parse_datetime(input_time: str): #EXAMPLE: 2022-12-16T19:49:33.929000+00:00
-    local_timezone = tzlocal.get_localzone()
-    
+# # Parses UTC time (idk if it works 100% of the time)
+# def parse_datetime(input_time: str): #EXAMPLE: 2022-12-16T19:49:33.929000+00:00
+#     local_timezone = tzlocal.get_localzone()
+#     
+#     date = input_time.split("T")[0]
+#     utc_time = datetime.datetime.strptime(input_time.removesuffix("+00:00").split("T")[1].split(".")[0], "%H:%M:%S")
+#     
+#     local_time = str(utc_time.replace(tzinfo = pytz.utc).astimezone(local_timezone)).split(" ")[1].split("-")[0]
+#     
+#     year = date.split("-")[0]
+#     month = date.split("-")[1]
+#     day = date.split("-")[2]
+#     
+#     return f"{month}-{day}-{year} {local_time}"
+
+# A temp. replacement
+def parse_datetime(input_time: str):
     date = input_time.split("T")[0]
-    utc_time = datetime.datetime.strptime(input_time.removesuffix("+00:00").split("T")[1].split(".")[0], "%H:%M:%S")
-    
-    local_time = str(utc_time.replace(tzinfo=pytz.utc).astimezone(local_timezone)).split(" ")[1].split("-")[0]
-    
+
     year = date.split("-")[0]
     month = date.split("-")[1]
     day = date.split("-")[2]
+
+    time = input_time.removesuffix("+00:00").split("T")[1].split(".")[0]
     
-    return f"{month}-{day}-{year} {local_time}"
+    return f"{month}-{day}-{year} {time}"
+
 
 # Retrieves and returns messages from a discord channel
 def retrieve_messages(token: str, channel_id: int | str):

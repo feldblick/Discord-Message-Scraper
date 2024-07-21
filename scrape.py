@@ -1,6 +1,6 @@
 # Good luck to whoever wants to read this...
 
-import sys, json 
+import sys, json , math
 import utils
 
 
@@ -12,7 +12,7 @@ last_message_id = 0
 
 channel_id = sys.argv[2]
 number_messages = int(sys.argv[3])
-number_loops = int(utils.round_up(number_messages, 50) / 50)
+number_loops = math.ceil(utils.round_up(number_messages, 50) / 50)
 
 print(f"\nScraping {number_messages} messages from {channel_id} in {number_loops} loops\n")
 
