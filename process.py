@@ -1,41 +1,33 @@
-import sys, json, re
-import utils
+import json, os
+import util
 
+class Processor:
+    def __init__(self, input_file: str, output_file: str) -> None:
+        self._input_file = input_file
+        self._output_file = output_file
 
-users = {}
+    def read(self):
+        with open(f"output/scraper/{self._input_file}", "r") as f:
+            self._json: list[dict] = json.load(f)
 
-# Loads messages from a JSON output
-with open(f"files/scraper/{sys.argv[1]}.json", encoding = "utf-8") as data:
-    json_data = json.load(data)
+    def save(self):
+        if not os.path.exists("output/processor"):
+            os.makedirs("output/processor")
 
-# Correlates a user ID with a username, used for replacing mentions
-for message in json_data:
-    users[message["author_id"]] = f'{message["author_username"]}#{message["author_discriminator"]}'
+        with open(f"output/processor/{self._output_file}", "w") as f:
+            json.dump(self._json, f, indent = 4)
 
-# Actually replaces the ID mentions with username ones
-# (normal mentions look kinda like this <@ID>, makes them look like @USERNAME)
-for i, message in enumerate(json_data):
-    if re.search(r"<@\d{18}>", message["content"]) != None:
-        for user_mention in re.findall(r"<@\d{18}>", message["content"]):
-            try:
-                json_data[i]["content"] = re.sub(r"<@\d{18}>", "@" + users[user_mention.removeprefix("<@").removesuffix(">")], message["content"], 1)
-            except Exception as e:
-                print(f"error {str(e)}")
+    def replace_timestamp(self):
+        for i, message in enumerate(self._json.copy()):
+            self._json[i]["timestamp"] = util.utc_to_local(message["timestamp"])
 
-# Replaces UTC timestamp
-for i, message in enumerate(json_data):
-    json_data[i]["timestamp"] = utils.parse_datetime(message["timestamp"])
+    def replace_mentions(self):
+        users = {}
 
+        for message in self._json:
+            users[message["author_id"]] = f"{message["author_username"]}{f"#{message["author_discriminator"]}" if int(message["author_discriminator"]) else ""}"
 
-# Writes processed input to a debug txt file just incase anything happens
-with open(f"files/processor/debug-{sys.argv[2]}.txt", "w", encoding = "utf-8") as output:
-    output.write(json.dumps(json_data))
-
-json_load = json.loads(json.dumps(json_data))
-json_dump = json.dumps(json_load, indent = 4)
-
-# Writes processed JSON to the final output JSON file
-with open(f"files/processor/{sys.argv[2]}.json", "w") as output:
-    output.write(json_dump)
-
-print("\nDone!")
+        for i, message in enumerate(self._json.copy()):
+            if message["mentions"]:
+                for k, v in users.items():
+                    self._json[i]["content"] = self._json[i]["content"].replace(f"<@{k}>", f"@{v}")

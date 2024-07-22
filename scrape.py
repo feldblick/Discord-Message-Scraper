@@ -1,85 +1,71 @@
-# Good luck to whoever wants to read this...
+import math, typing
+import util
 
-import sys, json, math
-import utils
+def scrape(token: str, channel_id: int, number_messages: int, loop_finished_callback: typing.Callable[[int, int], None] | None = None):
+    client = util.DiscordClient(token)
+    number_loops = math.ceil(util.round_up(number_messages, 50) / 50)
 
+    data: list[dict] = []
 
-token = utils.read_yml("C:/Users/BWP09/Desktop/Code/Python/Discord/Client/Client_Scraper/config/token.yml")["token"]
+    prev_message_id = 0
+    messages = client.retrieve_messages(channel_id)
+    
+    message_count = 0
+    loop_count = 0
+    
+    stop = False
+    while not stop:
+        for message in messages:
+            prev_message_id = message["id"]
 
-data = []
-last_message_id = 0
+            data.append({
+                "content": message["content"],
+                "message_id": message["id"],
+                "author_id": message["author"]["id"],
+                "author_username": message["author"]["username"],
+                "author_discriminator": message["author"]["discriminator"],
+                "timestamp": message["timestamp"],
+                "attachments": message["attachments"],
+                "mentions": message["mentions"]
+            })
 
+            data[message_count]["reactions"] = []
 
-channel_id = sys.argv[2]
-number_messages = int(sys.argv[3])
-number_loops = math.ceil(utils.round_up(number_messages, 50) / 50)
+            if "reactions" in message:
+                data[message_count]["reactions"] = message["reactions"]
 
-print(f"\nScraping {number_messages} messages from {channel_id} in {number_loops} loops\n")
+                for reaction_i, reaction in enumerate(data[message_count]["reactions"]):
+                    data[message_count]["reactions"][reaction_i] = {
+                        "name": reaction["emoji"]["name"],
+                        "count": reaction["count"]
+                    }
+            for attachment_i, attachment in enumerate(data[message_count]["attachments"]):
+                try:
+                    data[message_count]["attachments"][attachment_i] = attachment["url"]
+                except:
+                    data[message_count]["attachments"][attachment_i] = attachment
 
-messages = utils.retrieve_messages(token, channel_id)
-
-i = 0
-main_i = 0
-stop = False
-while not stop:
-    for message in messages:
-        last_message_id = message["id"]
-        
-        data.append({
-            "content": message["content"],
-            "message_id": message["id"],
-            "author_id": message["author"]["id"],
-            "author_username": message["author"]["username"],
-            "author_discriminator": message["author"]["discriminator"],
-            "timestamp": message["timestamp"],
-            "attachments": message["attachments"],
-            "mentions": message["mentions"]
-        })
-
-        if "reactions" in message:
-            data[i]["reactions"] = message["reactions"]
-
-            for reaction_i, reaction in enumerate(data[i]["reactions"]):
-                data[i]["reactions"][reaction_i] = {
-                    "name": reaction["emoji"]["name"],
-                    "count": reaction["count"]
+            for mention_i, mention in enumerate(data[message_count]["mentions"]):
+                data[message_count]["mentions"][mention_i] = {
+                    "id": mention["id"],
+                    "username": mention["username"],
+                    "discriminator": mention["discriminator"]
                 }
 
-        else:
-            data[i]["reactions"] = []
+            message_count += 1
 
-        for attachment_i, attachment in enumerate(data[i]["attachments"]):
-            try:
-                data[i]["attachments"][attachment_i] = attachment["url"]
-            except:
-                data[i]["attachments"][attachment_i] = attachment
+            if message_count >= number_messages:
+                stop = True
+                break
 
-        for mention_i, mention in enumerate(data[i]["mentions"]):
-            data[i]["mentions"][mention_i] = {
-                "id": mention["id"],
-                "username": mention["username"],
-                "discriminator": mention["discriminator"]
-            }
-        
-        i += 1
+        messages = client.retrieve_messages_before(channel_id, prev_message_id)
 
-    messages = utils.retrieve_messages_before(token, channel_id, last_message_id)
+        if loop_finished_callback:
+            loop_finished_callback(loop_count, number_loops)
+
+        loop_count += 1
+
+        if loop_count >= number_loops:
+            stop = True
     
-    
-    print(f"Done with loop {main_i} of {number_loops}", end = "\r")
-    
-    main_i += 1
-    
-    if main_i >= number_loops: break
-
-
-with open(f"files/scraper/debug-{sys.argv[1]}.txt", "w", encoding = "utf-8") as output:
-    output.write(json.dumps(data))
-
-json_load = json.loads(json.dumps(data))
-json_data = json.dumps(json_load, indent = 4)
-
-with open(f"files/scraper/{sys.argv[1]}.json", "w") as output:
-    output.write(json_data)
-
-print("\nDone!")
+    return data
