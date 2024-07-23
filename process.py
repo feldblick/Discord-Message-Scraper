@@ -19,7 +19,8 @@ class Processor:
 
     def replace_timestamp(self):
         for i, message in enumerate(self._json.copy()):
-            self._json[i]["timestamp"] = util.utc_to_local(message["timestamp"])
+            try: self._json[i]["timestamp"] = util.utc_to_local(message["timestamp"])
+            except: print(f"Couldn't update timestamp for message {message["message_id"]}")
 
     def replace_mentions(self):
         users = {}

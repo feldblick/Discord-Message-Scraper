@@ -25,7 +25,9 @@ class DiscordClient:
         )
 
 def utc_to_local(utc_time: str, format_str: str = "{m}/{d}/{y2} {h12}:{min}:{sec} {ampm}"):
-    return parse_datetime(datetime.datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%S.%f%z").astimezone(), format_str)
+    try: return parse_datetime(datetime.datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%S.%f%z").astimezone(), format_str)
+    except: return parse_datetime(datetime.datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%S%z").astimezone(), format_str)
+
 
 def parse_datetime(datetime_: datetime.datetime, formatted: str):
     date_time_replace = {
