@@ -5,6 +5,9 @@
 Allows you to scrape messages from a Discord channel!  
 Saves scraped messages to a JSON file, which can be further processed.
 
+## Setup
+Run `python -m pip install requests pycryptodome pypiwin32`
+
 ## Usage
 ### main.py
 Run `python main.py`, and follow the steps!
