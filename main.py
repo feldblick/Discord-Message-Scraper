@@ -45,7 +45,7 @@ def set_token():
                     break
 
                 for i, token in enumerate(tokens):
-                    print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * "*"}{token[-6:]}")
+                    print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * '*'}{token[-6:]}")
 
                 print("\nDo you want to check the validity of found tokens?")
                 choice = prompt("Y or n > ", ["Y", "n"], "ERROR: Please select a valid option")
@@ -55,12 +55,13 @@ def set_token():
                     print(f"Checking {len(tokens)} tokens:")
 
                     for i, token in enumerate(tokens.copy()):
-                        print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * "*"}{token[-6:]}: ", end = "")
+                        print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * '*'}{token[-6:]}: ", end = "")
                                 
                         valid = grabber.is_valid(token)
 
                         if valid:
-                            print(f"Valid! Username is \"{valid["username"]}\".")
+                            print(f"Valid! Username is \"{valid['username']}\".")
+
                         
                         else:
                             tokens.pop(i)
@@ -71,7 +72,7 @@ def set_token():
                 print("Please choose a token to use...")
 
                 for i, token in enumerate(tokens):
-                    print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * "*"}{token[-6:]}")
+                    print(f"{i + 1}. {token[:6]}{len(token[6:-6]) // 2 * '*'}{token[-6:]}")
 
                 print(f"{i + 2}. Go back")
 
